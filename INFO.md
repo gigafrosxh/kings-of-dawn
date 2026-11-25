@@ -1,6 +1,6 @@
 # Kings of Dawn – verbindlicher Entwicklungs- und Release-Workflow
 
-Diese Datei ist die maßgebliche Prozess- und Versionsvorgabe für Menschen, Codex und Claude Code. Der [Projektauftrag](PROJECT_SPEC.md) bleibt die fachliche und technische Spezifikation (Unreal Engine 5, Rust-Core); die bisherigen M0–M4-Phasen sind nur Orientierung, keine Release-Milestones mehr. Bei Widersprüchen zum bisherigen Prozess gilt INFO.md.
+Diese Datei ist die maßgebliche Prozess- und Versionsvorgabe für Menschen, Codex und Claude Code. Der [Projektauftrag](PROJECT_SPEC.md) ist der kompakte Einstieg in die modulare fachliche und technische Spezifikation (Unreal Engine 5, Rust-Core); [ROADMAP.md](docs/ROADMAP.md) verweist auf jeden Einzelauftrag. die bisherigen M0–M4-Phasen sind nur Orientierung, keine Release-Milestones mehr. Bei Widersprüchen zum bisherigen Prozess gilt INFO.md.
 
 ## 1. Versionsmodell
 
@@ -127,7 +127,7 @@ Reihenfolge nach Abhängigkeiten, nicht nach F-ID. Vorwärtsabhängigkeiten werd
 ## 7. Arbeitsregeln für Coding-Agenten
 
 - Zu Beginn dieser Datei folgen und den aktuell freigegebenen Versions-Milestone prüfen. Nicht einfach das nächste Feature anfangen.
-- Nur aktuelle Issues, relevante Abhängigkeiten und betroffene Dateien lesen. Kein vollständiges HTML mit Base64-Bildern und keine unnötigen Build-Logs in den Kontext laden.
+- Nur aktuelle Issues, den passenden Einzelauftrag aus `docs/features/` über [ROADMAP.md](docs/ROADMAP.md), relevante Abhängigkeiten und betroffene Dateien lesen. Keine Archivfassung standardmäßig laden. Kein vollständiges HTML mit Base64-Bildern und keine unnötigen Build-Logs in den Kontext laden.
 - Bugfixes zuerst reproduzieren, Regressionstest ergänzen, minimal korrigieren, bauen und testen. Ergebnisse, Commit und Fix-Version im Issue dokumentieren.
 - Issues nach verifiziertem Fix schließen; Feature-Issue erst nach kompletter Stabilisierung. Keine erfundenen Tests, Release-Ergebnisse oder Bugs.
 - Tags nicht überschreiben. Keine künstlichen Patch- oder Feature-Änderungen; Releases mit nachvollziehbaren Versionsständen und Testnachweisen.
