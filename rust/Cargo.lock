@@ -23,3 +23,10 @@ version = "0.1.0"
 dependencies = [
  "kod-core",
 ]
+
+[[package]]
+name = "kod-scenario"
+version = "0.1.0"
+dependencies = [
+ "kod-core",
+]
