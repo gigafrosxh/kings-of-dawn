@@ -7,3 +7,10 @@ publish = false
 
 [lib]
 path = "src/lib.rs"
+
+[features]
+# Exposes the `fixture` test domain used by kernel tests and the FFI roundtrip (#7).
+fixtures = []
+
+[dev-dependencies]
+kod-core = { path = ".", features = ["fixtures"] }
