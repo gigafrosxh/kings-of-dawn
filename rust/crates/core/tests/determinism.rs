@@ -558,3 +558,60 @@ fn golden_state_hash() {
 
 const GOLDEN_365: u128 = 97271787111575379684882249859281977556;
 const GOLDEN_EMPTY: u128 = 12555637202742734912531531974392262754;
+
+/// Review finding on #54: commands submitted after the last step must be part
+/// of the end checkpoint, and `verify` must agree with it.
+#[test]
+fn submissions_after_last_step_are_covered_by_end_checkpoint() {
+    for every in [0, 1, 2] {
+        let mut rec = Replay::new(sim(SEED), every);
+        rec.submit(env(
+            1,
+            1,
+            0,
+            LedgerCommand::Open {
+                name: "a".into(),
+                deposit: fx("1"),
+            },
+        ))
+        .unwrap();
+        rec.step();
+        rec.step();
+        // Queued for a later tick after the last step.
+        rec.submit(env(
+            1,
+            2,
+            5,
+            LedgerCommand::Open {
+                name: "b".into(),
+                deposit: fx("2"),
+            },
+        ))
+        .unwrap();
+        let (live, log) = rec.finish();
+        assert_eq!(log.final_hash(), Some(live.state_hash()), "every={every}");
+        let replayed = log.verify::<Ledger>().unwrap();
+        assert_eq!(replayed.state_hash(), live.state_hash(), "every={every}");
+        assert_eq!(replayed.queued(), 1);
+    }
+}
+
+#[test]
+fn finish_without_steps_records_single_checkpoint() {
+    let mut rec = Replay::new(sim(SEED), 10);
+    rec.submit(env(
+        1,
+        1,
+        0,
+        LedgerCommand::Close {
+            account: AccountId::new(1),
+        },
+    ))
+    .unwrap();
+    let (live, log) = rec.finish();
+    assert_eq!(log.checkpoints, vec![(Tick(0), live.state_hash())]);
+    assert_eq!(
+        log.verify::<Ledger>().unwrap().state_hash(),
+        live.state_hash()
+    );
+}
