@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "reviewed": "2026-11-26",
+  "distribution_assumption": "commercial game; geodata bundled in shipped builds",
+  "decision_values": {
+    "bundle": "may ship in game builds with the listed obligations",
+    "bundle-filtered": "may ship only the subset passing the listed filter",
+    "conditional": "may ship only after the per-item check in conditions passes",
+    "tooling-only": "may be used by offline import/validation tools; never shipped, never merged into shipped data",
+    "exclude": "must not be imported or shipped",
+    "reference": "documentation/method source, no data import"
+  },
+  "sources": [
+    {
+      "id": "A",
+      "name": "Cliopatria (Seshat Global History Databank)",
+      "url": "https://zenodo.org/records/24518977",
+      "doi": "10.5281/zenodo.24518977",
+      "version": "v0.2.2",
+      "published": "2026-11-25",
+      "retrieved": "2026-11-26",
+      "coverage": "global historical polities, 3400 BC - 2024 AD (frame years)",
+      "files": [
+        {
+          "name": "cliopatria-v0.2.2.zip",
+          "size": "300.0 MB",
+          "sha256": null
+        }
+      ],
+      "license": "CC-BY-4.0",
+      "commercial_use": true,
+      "share_alike": false,
+      "obligations": [
+        "credit creators (Ed Chalstrey, James Bennett; Seshat Global History Databank) with DOI and license in game credits and data notice",
+        "mark modifications"
+      ],
+      "decision": "bundle",
+      "conditions": [
+        "before import: check release notes/README inside the archive for sub-sources with different terms",
+        "record sha256 of the downloaded archive here"
+      ],
+      "notes": "Zenodo lists the record as software; the archive contains the polity geometries. Primary historical source."
+    },
+    {
+      "id": "B",
+      "name": "historical-basemaps (A. Ourednik)",
+      "url": "https://github.com/aourednik/historical-basemaps",
+      "version": "repository HEAD (no release)",
+      "retrieved": "2026-11-26",
+      "coverage": "global historical GeoJSON snapshots",
+      "license": "GPL-3.0",
+      "commercial_use": true,
+      "share_alike": true,
+      "obligations": [
+        "copyleft: derived data must stay GPL-3.0"
+      ],
+      "decision": "tooling-only",
+      "conditions": [
+        "secondary comparison in offline validation only",
+        "no geometry, attribute or derived boundary may enter shipped data"
+      ],
+      "notes": "Origins of individual layers are not documented with licenses (README: collected and adapted from diverse sources); README calls the maps work in progress."
+    },
+    {
+      "id": "C",
+      "name": "OpenHistoricalMap",
+      "url": "https://www.openhistoricalmap.org/copyright",
+      "version": "live database (snapshot date to record at export)",
+      "retrieved": "2026-11-26",
+      "coverage": "dated regional geometries, roads, settlements; no complete global yearly coverage",
+      "license": "CC0-1.0 (default)",
+      "commercial_use": true,
+      "share_alike": false,
+      "obligations": [
+        "attribution not required; credit 'OpenHistoricalMap contributors' anyway"
+      ],
+      "decision": "bundle-filtered",
+      "conditions": [
+        "import only elements without a license= tag or with license=CC0",
+        "exclude elements tagged CC BY-SA and OSM-derived coastline/water data (CC BY-SA 2.0)",
+        "exclude sources with unstated license (e.g. ANR COMMUNES)"
+      ],
+      "notes": "Per-element exceptions are documented via license= tags."
+    },
+    {
+      "id": "D",
+      "name": "CShapes 2.0 (ETH Zurich ICR)",
+      "url": "https://icr.ethz.ch/data/cshapes/",
+      "version": "2.0",
+      "retrieved": "2026-11-26",
+      "coverage": "state borders 1886-2019 (Europe from 1816)",
+      "license": "CC-BY-NC-SA-4.0",
+      "commercial_use": false,
+      "share_alike": true,
+      "obligations": [
+        "cite Schvitz et al. 2022, Journal of Conflict Resolution 66(1)"
+      ],
+      "decision": "exclude",
+      "conditions": [
+        "NonCommercial term is incompatible with a commercial game; not even for tooling that produces shipped data"
+      ],
+      "notes": "May be consulted manually as literature, not imported."
+    },
+    {
+      "id": "E",
+      "name": "Natural Earth Admin 0 Countries 1:10m",
+      "url": "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/",
+      "terms_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "version": "5.1.1",
+      "retrieved": "2026-11-26",
+      "coverage": "modern country boundaries (not a day-accurate border state)",
+      "files": [
+        {
+          "name": "ne_10m_admin_0_countries.zip",
+          "size": null,
+          "sha256": null
+        }
+      ],
+      "license": "Public-Domain",
+      "commercial_use": true,
+      "share_alike": false,
+      "obligations": [
+        "none; optional credit 'Made with Natural Earth'"
+      ],
+      "decision": "bundle",
+      "conditions": [
+        "do not import the third-party layers with separate release notes (Washington Post, EC JRC rivers/lakes Europe, XNR roads, IMA time zones)",
+        "disputed areas handled per Natural Earth disputed-boundaries policy (source H)"
+      ],
+      "notes": "Modern reference layer only; not projected onto earlier centuries."
+    },
+    {
+      "id": "F",
+      "name": "geoBoundaries (gbOpen)",
+      "url": "https://www.geoboundaries.org/",
+      "version": "gbOpen (release to record at download)",
+      "retrieved": "2026-11-26",
+      "coverage": "current administrative levels ADM0-ADM5",
+      "license": "CC-BY-4.0 / ODbL-1.0 (per boundary)",
+      "commercial_use": true,
+      "share_alike": "per boundary (ODbL share-alike for databases)",
+      "obligations": [
+        "credit 'geoBoundaries' with link www.geoboundaries.org in game credits",
+        "cite Runfola et al. 2020, PLoS ONE 15(4): e0231866"
+      ],
+      "decision": "conditional",
+      "conditions": [
+        "per-boundary license record must be CC BY 4.0 (or more permissive) to ship",
+        "ODbL boundaries only as separately shipped database with ODbL notice, otherwise excluded",
+        "global composites (CGAZ) excluded until their license is documented",
+        "modern era only"
+      ],
+      "notes": "Site states aim for full CC BY compatibility in 2027; re-check at import."
+    },
+    {
+      "id": "G",
+      "name": "Cliopatria methodology article (Scientific Data)",
+      "url": "https://www.nature.com/articles/s41597-025-04516-9",
+      "retrieved": null,
+      "license": "n/a (article)",
+      "commercial_use": null,
+      "share_alike": null,
+      "obligations": [
+        "cite when describing data method"
+      ],
+      "decision": "reference",
+      "conditions": [],
+      "notes": "Method and limits of reconstruction; not a primary source. Page not re-checked in this review."
+    },
+    {
+      "id": "H",
+      "name": "Natural Earth disputed boundaries policy",
+      "url": "https://www.naturalearthdata.com/about/disputed-boundaries-policy/",
+      "retrieved": null,
+      "license": "n/a (policy)",
+      "commercial_use": null,
+      "share_alike": null,
+      "obligations": [],
+      "decision": "reference",
+      "conditions": [],
+      "notes": "De facto / de jure handling; our cartographic decision must be documented per dispute. Page not re-checked in this review."
+    }
+  ]
+}
