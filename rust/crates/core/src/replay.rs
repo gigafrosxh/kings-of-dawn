@@ -15,7 +15,7 @@ use crate::sim::{Simulation, SubmitError, TickReport};
 use crate::time::Tick;
 
 /// Current replay log format version.
-pub const REPLAY_FORMAT_VERSION: u32 = 1;
+pub const REPLAY_FORMAT_VERSION: u32 = 2;
 
 /// Replay failure.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -68,8 +68,11 @@ pub struct ReplayLog<C> {
     pub initial_save: Vec<u8>,
     /// `(submitted before tick, command)` in submission order.
     pub commands: Vec<(Tick, CommandEnvelope<C>)>,
-    /// `(tick, hash)` with `tick` = `next_tick()` when the hash was taken;
-    /// strictly ascending.
+    /// `(tick, hash)`, strictly ascending. A checkpoint at tick `t` is the
+    /// state hash once every command submitted before tick `t` is processed
+    /// has been queued, i.e. directly before stepping `t` (or at the end of
+    /// the recording for `t == end_tick`). Format v2; v1 hashed before late
+    /// submissions and could disagree with `verify`.
     pub checkpoints: Vec<(Tick, StateHash)>,
     /// `next_tick()` at the end of the recording.
     pub end_tick: Tick,
@@ -126,26 +129,25 @@ impl<C: Clone> ReplayLog<C> {
         let mut checkpoints = self.checkpoints.iter().peekable();
         loop {
             let now = sim.next_tick();
-            while let Some(&&(tick, expected)) = checkpoints.peek() {
-                if tick != now {
-                    if tick < now {
-                        return Err(ReplayError::Malformed("checkpoint outside recorded range"));
-                    }
-                    break;
-                }
-                let actual = sim.state_hash();
-                if actual != expected {
-                    return Err(ReplayError::Divergence {
-                        tick,
-                        expected,
-                        actual,
-                    });
-                }
-                checkpoints.next();
-            }
             while let Some((tick, envelope)) = commands.next_if(|(t, _)| *t == now) {
                 sim.submit(envelope.clone())
                     .map_err(|error| ReplayError::Submit { tick: *tick, error })?;
+            }
+            if let Some(&&(tick, expected)) = checkpoints.peek() {
+                if tick < now {
+                    return Err(ReplayError::Malformed("checkpoint outside recorded range"));
+                }
+                if tick == now {
+                    let actual = sim.state_hash();
+                    if actual != expected {
+                        return Err(ReplayError::Divergence {
+                            tick,
+                            expected,
+                            actual,
+                        });
+                    }
+                    checkpoints.next();
+                }
             }
             if now == self.end_tick {
                 break;
@@ -165,6 +167,8 @@ pub struct Replay<D: Domain> {
     sim: Simulation<D>,
     log: ReplayLog<D::Command>,
     checkpoint_every: u64,
+    /// A checkpoint is due for the current tick (taken before stepping it).
+    checkpoint_due: bool,
 }
 
 impl<D: Domain> Replay<D> {
@@ -175,13 +179,14 @@ impl<D: Domain> Replay<D> {
         let log = ReplayLog {
             initial_save: SaveFile::write(&sim),
             commands: Vec::new(),
-            checkpoints: vec![(start, sim.state_hash())],
+            checkpoints: Vec::new(),
             end_tick: start,
         };
         Self {
             sim,
             log,
             checkpoint_every,
+            checkpoint_due: true,
         }
     }
 
@@ -199,20 +204,23 @@ impl<D: Domain> Replay<D> {
 
     /// Steps the simulation and takes due checkpoints.
     pub fn step(&mut self) -> TickReport<D> {
+        if self.checkpoint_due {
+            self.log
+                .checkpoints
+                .push((self.sim.next_tick(), self.sim.state_hash()));
+        }
         let report = self.sim.step();
         let now = self.sim.next_tick();
-        if self.checkpoint_every > 0 && now.0.is_multiple_of(self.checkpoint_every) {
-            self.log.checkpoints.push((now, self.sim.state_hash()));
-        }
+        self.checkpoint_due =
+            self.checkpoint_every > 0 && now.0.is_multiple_of(self.checkpoint_every);
         report
     }
 
     /// Ends the recording with a final checkpoint.
     pub fn finish(mut self) -> (Simulation<D>, ReplayLog<D::Command>) {
+        // The end checkpoint includes commands submitted after the last step.
         let now = self.sim.next_tick();
-        if self.log.checkpoints.last().map(|(t, _)| *t) != Some(now) {
-            self.log.checkpoints.push((now, self.sim.state_hash()));
-        }
+        self.log.checkpoints.push((now, self.sim.state_hash()));
         self.log.end_tick = now;
         (self.sim, self.log)
     }
