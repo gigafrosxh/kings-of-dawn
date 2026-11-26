@@ -46,7 +46,7 @@ void SKodScenarioPanel::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SBox)
-		.WidthOverride(430.f)
+		.WidthOverride(460.f)
 		[
 			SNew(SBorder)
 			.BorderImage(KodStyle::White())
@@ -90,12 +90,12 @@ TSharedRef<SWidget> SKodScenarioPanel::MakeButton(const FText& Label, FOnClicked
 			.IsEnabled(bEnabled)
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
-			.ContentPadding(FMargin(6.f, 6.f))
+			.ContentPadding(FMargin(3.f, 6.f))
 			.OnClicked(OnClicked)
 			[
 				SNew(STextBlock)
 				.Text(Label)
-				.Font(KodStyle::Font(10, true))
+				.Font(KodStyle::Font(9, true))
 				.ColorAndOpacity(bActive ? KodStyle::Brass : KodStyle::Text)
 			]
 		];
@@ -150,26 +150,24 @@ TSharedRef<SWidget> SKodScenarioPanel::BuildYearGrid()
 	{
 		const int32 Year = V.Presets[i].Key;
 		const FText Label = (i == V.Presets.Num() - 1) ? LOCTEXT("Today", "Heute") : FText::FromString(V.Presets[i].Value);
-		Grid->AddSlot(i % 5, i / 5)[MakeButton(Label, FOnClicked::CreateSP(this, &SKodScenarioPanel::OnPreset, Year), V.Year == Year, !bLocked)];
+		Grid->AddSlot(i % 4, i / 4)[MakeButton(Label, FOnClicked::CreateSP(this, &SKodScenarioPanel::OnPreset, Year), V.Year == Year, !bLocked)];
 	}
 
 	TSharedRef<SHorizontalBox> Stepper = SNew(SHorizontalBox);
-	for (int32 Delta : {-100, -10, -1})
+	for (int32 Delta : {-100, -10, -1, 1, 10, 100})
 	{
-		Stepper->AddSlot().FillWidth(1.f).Padding(2.f)[MakeButton(FText::AsNumber(Delta), FOnClicked::CreateSP(this, &SKodScenarioPanel::OnStep, Delta), false, !bLocked)];
+		const FText Label = FText::FromString(Delta > 0 ? FString::Printf(TEXT("+%d"), Delta) : FString::FromInt(Delta));
+		Stepper->AddSlot().FillWidth(1.f).Padding(2.f)[MakeButton(Label, FOnClicked::CreateSP(this, &SKodScenarioPanel::OnStep, Delta), false, !bLocked)];
 	}
-	Stepper->AddSlot().FillWidth(1.6f).VAlign(VAlign_Center).HAlign(HAlign_Center)
+	TSharedRef<SWidget> YearLabel = SNew(SBox).HAlign(HAlign_Center).Padding(0.f, 4.f)
 	[
-		SNew(STextBlock).Text(FText::FromString(V.YearLabel)).Font(KodStyle::Font(14, true)).ColorAndOpacity(KodStyle::Brass)
+		SNew(STextBlock).Text(FText::FromString(V.YearLabel)).Font(KodStyle::Font(16, true)).ColorAndOpacity(KodStyle::Brass)
 	];
-	for (int32 Delta : {1, 10, 100})
-	{
-		Stepper->AddSlot().FillWidth(1.f).Padding(2.f)[MakeButton(FText::FromString(FString::Printf(TEXT("+%d"), Delta)), FOnClicked::CreateSP(this, &SKodScenarioPanel::OnStep, Delta), false, !bLocked)];
-	}
 
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot().AutoHeight()[Grid]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 6.f, 0.f, 0.f)[Stepper];
+		+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 6.f, 0.f, 0.f)[YearLabel]
+		+ SVerticalBox::Slot().AutoHeight()[Stepper];
 }
 
 TSharedRef<SWidget> SKodScenarioPanel::BuildPolities()

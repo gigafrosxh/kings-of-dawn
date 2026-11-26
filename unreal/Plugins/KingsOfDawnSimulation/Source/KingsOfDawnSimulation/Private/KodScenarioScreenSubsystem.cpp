@@ -10,6 +10,9 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
+#include "TimerManager.h"
+#include "UnrealClient.h"
+#include "Engine/World.h"
 #include "SKodScenarioPanel.h"
 #include "Widgets/Layout/SBox.h"
 
@@ -44,6 +47,16 @@ void UKodScenarioScreenSubsystem::Show(APlayerController* PC)
 	Mode.SetWidgetToFocus(PanelWidget);
 	PC->SetInputMode(Mode);
 	UE_LOG(LogKodSimulation, Log, TEXT("Scenario selection shown"));
+
+	// Development aid for visual checks: -KodScenarioScreenshot=<path> captures the
+	// viewport after the UI settled and quits.
+	FString ShotPath;
+	if (FParse::Value(FCommandLine::Get(), TEXT("KodScenarioScreenshot="), ShotPath) && PC->GetWorld())
+	{
+		FTimerHandle Shot, Quit;
+		PC->GetWorld()->GetTimerManager().SetTimer(Shot, [ShotPath]() { FScreenshotRequest::RequestScreenshot(ShotPath, true, false); }, 3.f, false);
+		PC->GetWorld()->GetTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 6.f, false);
+	}
 }
 
 void UKodScenarioScreenSubsystem::Hide()
