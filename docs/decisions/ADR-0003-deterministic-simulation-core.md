@@ -18,7 +18,7 @@ Die Simulation muss headless, reproduzierbar und unabhängig von Render-FPS und 
 7. **Zufall.** `DetRng` (xoshiro256**, Seed über SplitMix64), Zustand Teil des Saves; `fork(stream)` für unabhängige Teilströme.
 8. **Kanonischer Codec + State-Hash.** Ein eigener, abhängigkeitsfreier Little-Endian-Codec dient Hash und Save zugleich. State-Hash = FNV-1a/128 über Schema-ID, Schema-Version und kanonische Bytes des gesamten Simulationszustands (inkl. Queue, RNG, Sequenzen). Er ist ein Reproduzierbarkeits-Fingerabdruck, kein kryptografischer Schutz.
 9. **Save-Container v1.** `KODSAVE\0`, Container-Version, Schema-ID/-Version, State-Hash, Payload, Prüfsumme. Laden prüft Magic, Version, Prüfsumme, Schema und State-Hash und liefert nie einen Teilzustand. Ältere Schema-Versionen laufen über `Domain::migrate`, neuere werden abgelehnt. SQLite-Metadaten und Kompression (ARCHITECTURE.md) umhüllen diesen Container später.
-10. **Replay.** `ReplayLog` = Start-Save + eingereichte Commands mit Tick + Hash-Checkpoints. `verify` spielt headless nach und meldet die erste Divergenz.
+10. **Replay.** `ReplayLog` (Format v2) = Start-Save + eingereichte Commands mit Tick + Hash-Checkpoints. Ein Checkpoint bei Tick t ist der Zustand nach allen vor t eingereichten Commands, direkt vor dem Step von t; der End-Checkpoint enthält auch Commands nach dem letzten Step. `verify` spielt headless nach und meldet die erste Divergenz.
 11. **Keine externen Abhängigkeiten** im Kern: minimiert Determinismusrisiken und hält das FFI-Staticlib-Linking (#7) einfach.
 
 ## Konsequenzen

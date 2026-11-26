@@ -13,7 +13,7 @@ cargo test --manifest-path "$manifest" --workspace --locked
 cargo test --manifest-path "$manifest" --workspace --locked --release
 cargo build --manifest-path "$manifest" -p kod-headless --locked --release
 "$bin" verify-save rust/fixtures/ledger-v1-365.kodsave
-"$bin" verify-replay rust/fixtures/ledger-v1-365.kodreplay
+"$bin" verify-replay rust/fixtures/ledger-r2-365.kodreplay
 "$bin" soak --years 100
 out=$("$bin" bench --ticks 36525)
 echo "$out"
