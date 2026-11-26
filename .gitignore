@@ -22,3 +22,6 @@ Thumbs.db
 # Unreal plugin build output
 unreal/Plugins/*/Binaries/
 unreal/Plugins/*/Intermediate/
+# Unreal generated packaging state
+unreal/Build/
+unreal/Config/DefaultInput.ini
