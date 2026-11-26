@@ -20,8 +20,17 @@ def validate(manifest: dict) -> list[str]:
     if manifest.get("schema_version") != 1:
         errors.append("schema_version must be 1")
     decisions = set(manifest.get("decision_values", {}))
+    if not decisions:
+        errors.append("decision_values missing or empty")
+    sources = manifest.get("sources")
+    if not isinstance(sources, list) or not sources:
+        errors.append("sources missing or empty")
+        sources = []
     seen = set()
-    for src in manifest.get("sources", []):
+    for src in sources:
+        if not isinstance(src, dict):
+            errors.append("source entry is not an object")
+            continue
         sid = src.get("id", "?")
         for field in REQUIRED:
             if field not in src:
@@ -52,7 +61,40 @@ def validate(manifest: dict) -> list[str]:
     return errors
 
 
+def self_test() -> list[str]:
+    """Negative cases that must be rejected (run in CI with --self-test)."""
+    import copy
+
+    good = json.loads((Path(__file__).resolve().parent.parent / "data/sources/manifest.json").read_text(encoding="utf-8"))
+    failures = []
+    if validate(good):
+        failures.append("committed manifest must be valid")
+    cases = {
+        "only schema_version": {"schema_version": 1},
+        "empty sources": {**good, "sources": []},
+        "missing decision_values": {k: v for k, v in good.items() if k != "decision_values"},
+    }
+    nc = copy.deepcopy(good)
+    for s in nc["sources"]:
+        if s["id"] == "D":
+            s["decision"] = "bundle"
+    cases["non-commercial bundled"] = nc
+    dup = copy.deepcopy(good)
+    dup["sources"].append(copy.deepcopy(dup["sources"][0]))
+    cases["duplicate id"] = dup
+    for name, manifest in cases.items():
+        if not validate(manifest):
+            failures.append(f"accepted invalid manifest: {name}")
+    return failures
+
+
 def main() -> int:
+    if sys.argv[1:] == ["--self-test"]:
+        failures = self_test()
+        for f in failures:
+            print(f"self-test: {f}")
+        print("self-test ok" if not failures else "self-test FAILED")
+        return 1 if failures else 0
     path = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "data/sources/manifest.json")
     errors = validate(json.loads(path.read_text(encoding="utf-8")))
     for e in errors:
