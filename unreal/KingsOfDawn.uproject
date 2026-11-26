@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "Games",
+	"Description": "Kings of Dawn grand-strategy simulation",
+	"Modules": [
+		{
+			"Name": "KingsOfDawn",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
