@@ -132,6 +132,11 @@ impl<D: Domain> Simulation<D> {
         self.queue.len()
     }
 
+    /// Last accepted sequence number of `actor`, if any.
+    pub fn last_sequence(&self, actor: ActorId) -> Option<u64> {
+        self.last_sequence.get(&actor).copied()
+    }
+
     /// Answers a read-only query.
     pub fn query(&self, query: &D::Query) -> D::Answer {
         D::query(&self.state, query)

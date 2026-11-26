@@ -13,6 +13,7 @@ crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 kod-core = { path = "../core", features = ["fixtures"] }
+kod-scenario = { path = "../scenario" }
 
 [features]
 # Exports kod_test_panic for the C smoke test. Never enable in shipped builds.
