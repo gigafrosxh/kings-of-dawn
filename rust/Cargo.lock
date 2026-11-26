@@ -10,6 +10,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "kod-ffi"
+version = "0.1.0"
+dependencies = [
+ "kod-core",
+ "kod-ffi",
+]
+
+[[package]]
 name = "kod-headless"
 version = "0.1.0"
 dependencies = [

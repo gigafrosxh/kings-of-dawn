@@ -1,0 +1,22 @@
+[package]
+name = "kod-ffi"
+version = "0.1.0"
+description = "Versioned C ABI of the Kings of Dawn simulation for the Unreal plugin KingsOfDawnSimulation."
+edition = "2024"
+rust-version = "1.100"
+publish = false
+
+[lib]
+name = "kod_ffi"
+# staticlib is linked by Unreal (Build.cs); rlib serves the Rust tests.
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+kod-core = { path = "../core", features = ["fixtures"] }
+
+[features]
+# Exports kod_test_panic for the C smoke test. Never enable in shipped builds.
+test-hooks = []
+
+[dev-dependencies]
+kod-ffi = { path = ".", features = ["test-hooks"] }
