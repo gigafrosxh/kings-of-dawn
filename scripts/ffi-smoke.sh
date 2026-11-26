@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds kod_ffi as a static library and runs the C smoke test against the
-# generated header (Linux, macOS, Windows/MSYS with clang).
+# generated header (Linux/macOS with cc, Windows with MSVC cl from Git Bash).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,18 +15,17 @@ native_libs=$(cargo rustc --manifest-path "$manifest" -p kod-ffi --release --loc
 
 case "$(uname -s)" in
   MINGW*|MSYS*|CYGWIN*)
+    # Requires an MSVC developer environment (cl.exe on PATH).
     lib=rust/target/release/kod_ffi.lib
-    # MSVC-style flags (/defaultlib:foo.lib) -> clang-cl style link libraries.
-    libs=$(sed -e 's#/defaultlib:#-l#g' -e 's#\.lib##g' <<<"$native_libs")
-    exe="$out/smoke.exe"
+    export MSYS2_ARG_CONV_EXCL='*'
+    # shellcheck disable=SC2086
+    cl /nologo /W3 /WX /I "$include" rust/crates/ffi/tests/c/smoke.c /Fe"$out/smoke.exe" /Fo"$out/" /link "$lib" $native_libs
+    "$out/smoke.exe"
     ;;
   *)
     lib=rust/target/release/libkod_ffi.a
-    libs="$native_libs -lpthread"
-    exe="$out/smoke"
+    # shellcheck disable=SC2086
+    ${CC:-cc} -std=c11 -Wall -Wextra -Werror -I "$include" rust/crates/ffi/tests/c/smoke.c "$lib" $native_libs -lpthread -o "$out/smoke"
+    "$out/smoke"
     ;;
 esac
-
-# shellcheck disable=SC2086
-${CC:-clang} -std=c11 -Wall -Wextra -Werror -I "$include" rust/crates/ffi/tests/c/smoke.c "$lib" $libs -o "$exe"
-"$exe"

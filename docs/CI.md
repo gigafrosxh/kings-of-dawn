@@ -11,6 +11,8 @@ Workflow: [`.github/workflows/rust.yml`](../.github/workflows/rust.yml), lokal i
 | Unit-/Integrations-/Replay-/Doc-Tests (Debug + Release) | `cargo test --workspace --locked [--release]` | Windows, Linux, macOS |
 | Save-/Replay-Fixtures | `kod-headless verify-save` / `verify-replay` auf `rust/fixtures/*` | Windows, Linux, macOS |
 | 100-Jahre-Headless-Lauf mit Invarianten | `kod-headless soak --years 100` | Windows, Linux, macOS |
+| FFI-Header aktuell | `scripts/gen-ffi-header.sh --check` (cbindgen 0.29.4) | Linux |
+| FFI-C-Smoke-Test (Staticlib + Header, Roundtrip, Fehler, Panic, Threads) | `scripts/ffi-smoke.sh` | Windows (MSVC), Linux, macOS |
 | Benchmark + plattformübergreifender State-Hash | `kod-headless bench --ticks 36525`, Hash muss `BENCH_100Y_HASH` entsprechen | Windows, Linux, macOS |
 
 Plattformübergreifender Determinismus wird doppelt geprüft: durch die Golden-Hashes in `rust/crates/core/tests/determinism.rs` und durch den erwarteten Bench-Hash im Workflow. Abweichung auf einer Plattform = Determinismusfehler (P0).
@@ -28,6 +30,7 @@ Plattformübergreifender Determinismus wird doppelt geprüft: durch die Golden-H
 | Bereich | Windows | Linux | macOS |
 |---|---|---|---|
 | Rust-Kern + Headless-Runner | CI (windows-latest) | CI (ubuntu-latest) | CI (macos-latest), lokal Apple M4 |
+| Rust-FFI (Staticlib + C-ABI) | CI (MSVC) | CI | CI |
 | UE5-Editor-/Game-Build (5.8.4) | **nicht verifiziert** | nicht vorgesehen | **nicht verifiziert** |
 | UE-Automation-Tests | **nicht verifiziert** | – | – |
 | Verpacktes Windows-Package | **nicht verifiziert** | – | – |

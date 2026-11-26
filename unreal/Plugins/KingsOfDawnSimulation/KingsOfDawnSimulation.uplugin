@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Kings of Dawn Simulation",
+	"Description": "Binds the deterministic Rust simulation (kod-ffi static library, C ABI v1) and runs it on a worker thread.",
+	"Category": "Kings of Dawn",
+	"CanContainContent": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "KingsOfDawnSimulation",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [ "Win64", "Mac", "Linux" ]
+		}
+	]
+}

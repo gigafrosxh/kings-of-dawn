@@ -31,7 +31,11 @@ jobs:
         with:
           workspaces: rust
       - run: cargo fmt --manifest-path rust/Cargo.toml --all --check
-      - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+      - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --all-features --locked -- -D warnings
+      - name: Install cbindgen
+        run: cargo install cbindgen --version 0.29.4 --locked
+      - name: Generated FFI header is up to date
+        run: scripts/gen-ffi-header.sh --check
 
   test:
     name: test (${{ matrix.os }})
@@ -78,3 +82,26 @@ jobs:
             echo "::error::state hash $hash differs from expected $BENCH_100Y_HASH"
             exit 1
           fi
+
+  ffi-smoke:
+    name: ffi C smoke (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: MSVC developer environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Static library + C smoke test (roundtrip, errors, panic, threads)
+        run: scripts/ffi-smoke.sh
