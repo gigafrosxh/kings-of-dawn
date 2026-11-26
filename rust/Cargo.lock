@@ -8,3 +8,10 @@ version = "0.1.0"
 dependencies = [
  "kod-core",
 ]
+
+[[package]]
+name = "kod-headless"
+version = "0.1.0"
+dependencies = [
+ "kod-core",
+]

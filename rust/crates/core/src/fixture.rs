@@ -430,3 +430,67 @@ impl Decode for LedgerEvent {
         }
     }
 }
+
+/// Deterministic mixed (valid and invalid) command stream for benchmarks,
+/// regression fixtures and soak tests, as `(submit before tick, envelope)`.
+///
+/// Up to three commands per tick from actors 1..=3; about a third of them are
+/// rejected by validation.
+pub fn scenario(
+    seed: u64,
+    ticks: u64,
+) -> Vec<(Tick, crate::domain::CommandEnvelope<LedgerCommand>)> {
+    let mut rng = crate::rng::DetRng::from_seed(seed);
+    let mut out = Vec::new();
+    let mut seq = [0u64; 4];
+    for tick in 0..ticks {
+        for _ in 0..rng.below(4) {
+            let actor = 1 + rng.below(3) as usize;
+            seq[actor] += 1;
+            let command = match rng.below(10) {
+                0..=2 => LedgerCommand::Open {
+                    name: format!("acct-{}", rng.below(40)),
+                    deposit: Fixed::from_raw(
+                        i128::from(rng.below(5_000_000_000_000)) - 500_000_000_000,
+                    ),
+                },
+                3..=8 => LedgerCommand::Transfer {
+                    from: AccountId::new(rng.below(30) as u32),
+                    to: AccountId::new(rng.below(30) as u32),
+                    amount: Fixed::from_raw(i128::from(rng.below(900_000_000_000))),
+                },
+                _ => LedgerCommand::Close {
+                    account: AccountId::new(rng.below(30) as u32),
+                },
+            };
+            out.push((
+                Tick(tick),
+                crate::domain::CommandEnvelope {
+                    actor: ActorId::new(actor as u32),
+                    sequence: seq[actor],
+                    execute_at: Tick(tick + rng.below(3)),
+                    command,
+                },
+            ));
+        }
+    }
+    out
+}
+
+/// Ledger invariants checked by soak tests: no negative balance, unique
+/// names, no account id at or above the allocator.
+pub fn check_invariants(state: &LedgerState) -> Result<(), String> {
+    let mut names = std::collections::BTreeSet::new();
+    for (id, account) in &state.accounts {
+        if account.balance.is_negative() {
+            return Err(format!("{id} has negative balance {}", account.balance));
+        }
+        if !names.insert(account.name.as_str()) {
+            return Err(format!("duplicate name {}", account.name));
+        }
+        if id.get() >= state.ids.peek() {
+            return Err(format!("{id} not allocated"));
+        }
+    }
+    Ok(())
+}

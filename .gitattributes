@@ -1,0 +1,3 @@
+# Regression fixtures are binary; never normalise line endings.
+*.kodsave binary
+*.kodreplay binary

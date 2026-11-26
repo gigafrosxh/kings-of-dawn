@@ -1,0 +1,80 @@
+name: rust
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  # Expected final state hash of `kod-headless bench --ticks 36525` (100 years).
+  # Must be identical on every platform; a difference is a determinism bug (P0).
+  BENCH_100Y_HASH: 990d8ecc950c75c2be9922a133e491fc
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - run: cargo fmt --manifest-path rust/Cargo.toml --all --check
+      - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain (from rust-toolchain.toml)
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Tests (debug)
+        run: cargo test --manifest-path rust/Cargo.toml --workspace --locked
+      - name: Tests (release)
+        run: cargo test --manifest-path rust/Cargo.toml --workspace --locked --release
+      - name: Build headless runner
+        run: cargo build --manifest-path rust/Cargo.toml -p kod-headless --locked --release
+      - name: Verify committed save/replay fixtures
+        run: |
+          bin=rust/target/release/kod-headless
+          "$bin" verify-save rust/fixtures/ledger-v1-365.kodsave
+          "$bin" verify-replay rust/fixtures/ledger-v1-365.kodreplay
+      - name: 100-year soak with invariant checks
+        run: rust/target/release/kod-headless soak --years 100
+      - name: Benchmark + cross-platform hash check
+        run: |
+          out=$(rust/target/release/kod-headless bench --ticks 36525)
+          echo "$out"
+          hash=$(sed -n 's/.*state_hash=\([0-9a-f]*\).*/\1/p' <<<"$out")
+          {
+            echo "### Headless baseline (${{ matrix.os }})"
+            echo '```'
+            echo "$out"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$hash" != "$BENCH_100Y_HASH" ]; then
+            echo "::error::state hash $hash differs from expected $BENCH_100Y_HASH"
+            exit 1
+          fi
