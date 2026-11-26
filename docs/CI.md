@@ -31,9 +31,9 @@ Plattformübergreifender Determinismus wird doppelt geprüft: durch die Golden-H
 |---|---|---|---|
 | Rust-Kern + Headless-Runner | CI (windows-latest) | CI (ubuntu-latest) | CI (macos-latest), lokal Apple M4 |
 | Rust-FFI (Staticlib + C-ABI) | CI (MSVC) | CI | CI |
-| UE5-Editor-/Game-Build (5.8.4) | **nicht verifiziert** | nicht vorgesehen | **nicht verifiziert** |
-| UE-Automation-Tests | **nicht verifiziert** | – | – |
-| Verpacktes Windows-Package | **nicht verifiziert** | – | – |
+| UE5-Editor-/Game-Build (5.8.4) | **nicht verifiziert** | nicht vorgesehen | lokal verifiziert (Apple M4) |
+| UE-Automation-Tests | **nicht verifiziert** | – | lokal bestanden (`KingsOfDawn.Simulation`) |
+| Verpacktes Package + `-KodFfiSmoke` | **nicht verifiziert** | – | lokal PASS (Mac Development) |
 
 UE-Build, UE-Automation und Windows-Package laufen nicht auf GitHub-Hosted-Runnern (keine Engine-Installation, Lizenz- und Größenbedingungen) und sind lokal derzeit nicht prüfbar (keine Unreal-Installation; `/Users/Shared/Epic Games/UE_5.6` ist leer). Sie benötigen einen Windows-Rechner bzw. self-hosted Runner mit UE 5.8.4 und folgen mit #7 (FFI-Plugin) und #9 (Kartenprototyp). Bis dahin gilt dieser Teil der Abnahme von #10 als offen.
 

@@ -1,6 +1,6 @@
 # ADR-0002 – Rust–Unreal C-ABI und Plugin KingsOfDawnSimulation
 
-- Status: akzeptiert für Rust/C-Seite; Unreal-Seite **nicht kompiliert** (T02, Issue #7)
+- Status: akzeptiert; Unreal-Seite auf macOS verifiziert, Windows offen (T02, Issue #7)
 - Bereich: `rust/crates/ffi` (`kod-ffi`), `unreal/Plugins/KingsOfDawnSimulation`
 
 ## Entscheidungen
@@ -18,8 +18,10 @@
 
 - Rust: `rust/crates/ffi/tests/abi.rs` (Roundtrip, Save/Load, Fehlerpfade, Panic-Vergiftung, parallele Handles auf Threads).
 - C: `scripts/ffi-smoke.sh` kompiliert `rust/crates/ffi/tests/c/smoke.c` gegen Header und Staticlib (Linux/macOS mit cc, Windows mit MSVC `cl`) – in CI auf allen drei Plattformen.
-- Unreal: Automation-Tests `KingsOfDawn.Simulation.FfiRoundtrip` und `.WorkerLifecycle` sind geschrieben, aber **noch nie gebaut oder ausgeführt**, weil keine UE-5.8.4-Installation verfügbar ist. Ebenso offen: verpackter Windows-Build mit FFI-Roundtrip und sauberem Shutdown (Abnahme #7).
+- Unreal (2026-11-26, macOS arm64, UE 5.8.4, Xcode 27.0): `KingsOfDawnEditor Mac Development` baut; Automation-Tests `KingsOfDawn.Simulation.FfiRoundtrip` und `.WorkerLifecycle` bestanden (`UnrealEditor-Cmd … -ExecCmds="Automation RunTests KingsOfDawn.Simulation; Quit" -nullrhi`).
+- Verpackter Mac-Build (UAT `BuildCookRun -platform=Mac -clientconfig=Development -build -cook -stage -pak`): `KingsOfDawn -KodFfiSmoke -nullrhi` → `KodFfiSmoke: PASS` (Create, Commands, 365 Ticks, Save/Load, identischer Hash), Worker und GameInstance-Subsystem sauber beendet, Exit-Code 0.
+- **Offen:** verpackter **Windows**-Build mit demselben Smoke-Test (Abnahme #7) – kein Windows-Rechner verfügbar.
 
 ## Nächste Schritte
 
-Auf einem Windows-Rechner mit UE 5.8.4: `scripts/build-ffi.ps1`, Editor-Target bauen, Automation-Tests ausführen, Windows-Package erstellen und Roundtrip/Shutdown im Package prüfen; Befunde als Bugs gemäß INFO.md erfassen.
+Auf einem Windows-Rechner mit UE 5.8.4: `scripts/build-ffi.ps1`, Editor-Target bauen, Automation-Tests ausführen, Windows-Package erstellen und `KingsOfDawn.exe -KodFfiSmoke -nullrhi` prüfen (Exit-Code 0, Log `KodFfiSmoke: PASS`); Befunde als Bugs gemäß INFO.md erfassen.
