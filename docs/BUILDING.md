@@ -11,6 +11,8 @@ cargo clippy --manifest-path rust/Cargo.toml --all-targets --locked -- -D warnin
 
 `rust-toolchain.toml` selects Rust 1.100.0 and the `rustfmt`/`clippy` components.
 
+All CI checks (tests, fixtures, 100-year soak, benchmark hash) run locally with `scripts/ci-local.sh`; see [CI.md](CI.md).
+
 ## Unreal Engine
 
 Install Unreal Engine 5.8.4 and the matching supported Windows C++ toolchain. Open `unreal/KingsOfDawn.uproject` in the editor once to generate project files, or build the editor target from a Visual Studio Developer Command Prompt:

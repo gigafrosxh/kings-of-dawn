@@ -1,0 +1,14 @@
+[package]
+name = "kod-headless"
+version = "0.1.0"
+description = "Headless runner for Kings of Dawn: benchmarks, soak runs, replay verification and regression fixtures."
+edition = "2024"
+rust-version = "1.100"
+publish = false
+
+[[bin]]
+name = "kod-headless"
+path = "src/main.rs"
+
+[dependencies]
+kod-core = { path = "../core", features = ["fixtures"] }
