@@ -201,7 +201,7 @@ fn gen_fixtures(dir: &Path) -> Result<(), String> {
         Ok(path)
     };
     let save_path = write("ledger-v1-365.kodsave", &save)?;
-    let replay_path = write("ledger-v1-365.kodreplay", &replay)?;
+    let replay_path = write("ledger-r2-365.kodreplay", &replay)?;
     println!(
         "wrote {} ({} bytes) and {} ({} bytes), state_hash={}",
         save_path.display(),

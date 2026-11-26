@@ -1,7 +1,7 @@
 //! Save/replay regression fixtures (issue #10).
 //!
 //! `rust/fixtures/*` were written by `kod-headless gen-fixtures` with save
-//! container v1, replay format v1, kernel state v1 and ledger schema v1. They
+//! container v1, replay format v2, kernel state v1 and ledger schema v1. They
 //! must keep loading unchanged; if a format version is bumped intentionally,
 //! keep the old files, add new ones and test the migration path.
 
@@ -9,7 +9,7 @@ use kod_core::fixture::{self, Ledger, LedgerCommand, LedgerState};
 use kod_core::{Decode, Encode, Replay, ReplayLog, SaveFile, SimDate, Simulation, StateHash, Tick};
 
 const SAVE_V1: &[u8] = include_bytes!("../../../fixtures/ledger-v1-365.kodsave");
-const REPLAY_V1: &[u8] = include_bytes!("../../../fixtures/ledger-v1-365.kodreplay");
+const REPLAY_R2: &[u8] = include_bytes!("../../../fixtures/ledger-r2-365.kodreplay");
 
 /// Same value as `GOLDEN_365` in `determinism.rs`.
 const HASH_365: StateHash = StateHash(0x492d_dd60_8868_a007_20ee_bd74_66b4_00d4);
@@ -43,7 +43,7 @@ fn committed_save_v1_loads_with_known_hash() {
 
 #[test]
 fn committed_replay_v1_verifies() {
-    let log = ReplayLog::<LedgerCommand>::from_canonical_bytes(REPLAY_V1).unwrap();
+    let log = ReplayLog::<LedgerCommand>::from_canonical_bytes(REPLAY_R2).unwrap();
     let sim = log.verify::<Ledger>().unwrap();
     assert_eq!(sim.state_hash(), HASH_365);
     assert_eq!(log.final_hash(), Some(HASH_365));
@@ -59,7 +59,7 @@ fn current_writer_reproduces_fixtures_byte_for_byte() {
     );
     assert_eq!(
         log.to_canonical_bytes(),
-        REPLAY_V1,
+        REPLAY_R2,
         "replay encoding drifted; bump a format version"
     );
 }
