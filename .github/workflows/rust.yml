@@ -60,7 +60,7 @@ jobs:
         run: |
           bin=rust/target/release/kod-headless
           "$bin" verify-save rust/fixtures/ledger-v1-365.kodsave
-          "$bin" verify-replay rust/fixtures/ledger-v1-365.kodreplay
+          "$bin" verify-replay rust/fixtures/ledger-r2-365.kodreplay
       - name: 100-year soak with invariant checks
         run: rust/target/release/kod-headless soak --years 100
       - name: Benchmark + cross-platform hash check
