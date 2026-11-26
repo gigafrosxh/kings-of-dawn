@@ -1,0 +1,19 @@
+name: data
+
+on:
+  push:
+    branches: [main]
+    paths: ["data/**", "scripts/validate-sources.py", ".github/workflows/data.yml"]
+  pull_request:
+    paths: ["data/**", "scripts/validate-sources.py", ".github/workflows/data.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/validate-sources.py
