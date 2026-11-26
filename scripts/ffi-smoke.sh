@@ -10,7 +10,7 @@ out=rust/target/ffi-smoke
 mkdir -p "$out"
 
 cargo build --manifest-path "$manifest" -p kod-ffi --release --locked --features test-hooks
-native_libs=$(cargo rustc --manifest-path "$manifest" -p kod-ffi --release --locked --features test-hooks --crate-type staticlib -- --print native-static-libs 2>&1 \
+native_libs=$(cargo rustc --color never --manifest-path "$manifest" -p kod-ffi --release --locked --features test-hooks --crate-type staticlib -- --print native-static-libs 2>&1 \
   | sed -n 's/.*native-static-libs: //p' | tail -1)
 
 case "$(uname -s)" in
