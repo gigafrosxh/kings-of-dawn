@@ -15,10 +15,18 @@ version = "0.1.0"
 dependencies = [
  "kod-core",
  "kod-ffi",
+ "kod-scenario",
 ]
 
 [[package]]
 name = "kod-headless"
+version = "0.1.0"
+dependencies = [
+ "kod-core",
+]
+
+[[package]]
+name = "kod-scenario"
 version = "0.1.0"
 dependencies = [
  "kod-core",

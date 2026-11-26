@@ -19,6 +19,8 @@
 //! `kod_core::fixture::Ledger`, which exercises commands, validation errors,
 //! events, saves and hashes end to end.
 
+pub mod scenario;
+
 use std::cell::RefCell;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;

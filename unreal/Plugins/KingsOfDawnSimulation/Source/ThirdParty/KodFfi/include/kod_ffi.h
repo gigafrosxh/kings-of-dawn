@@ -70,6 +70,11 @@ typedef enum KodStatus {
 } KodStatus;
 
 /**
+ * Opaque scenario-setup handle.
+ */
+typedef struct KodScenario KodScenario;
+
+/**
  * Opaque simulation handle.
  */
 typedef struct KodSim KodSim;
@@ -296,6 +301,140 @@ enum KodStatus kod_ledger_close(struct KodSim *sim,
  * `sim` live handle; `out` valid for writes.
  */
 enum KodStatus kod_ledger_balance(struct KodSim *sim, uint32_t account, int64_t *out);
+
+/**
+ * Creates a setup against the M0 fixture atlas. `current_year` is the
+ * host's calendar year (upper bound of the year picker).
+ *
+ * # Safety
+ * `out` valid for writes.
+ */
+enum KodStatus kod_scenario_create(uint32_t abi_version,
+                                   int32_t current_year,
+                                   struct KodScenario **out);
+
+/**
+ * Releases a setup handle (null ignored).
+ *
+ * # Safety
+ * `h` null or a live handle, destroyed at most once.
+ */
+void kod_scenario_destroy(struct KodScenario *h);
+
+/**
+ * Selects an astronomical year (1 BC = 0).
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_select_year(struct KodScenario *h, int32_t year, uint32_t *out_code);
+
+/**
+ * Moves the year by `delta` (clamped to the range).
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_step_year(struct KodScenario *h, int32_t delta, uint32_t *out_code);
+
+/**
+ * Selects the mode: 0 historical, 1 alternate history, 2 sandbox.
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_select_mode(struct KodScenario *h, uint8_t mode, uint32_t *out_code);
+
+/**
+ * Selects the player polity; `polity == 0` clears the selection.
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_select_polity(struct KodScenario *h,
+                                          uint32_t polity,
+                                          uint32_t *out_code);
+
+/**
+ * Creates a custom polity (sandbox only).
+ *
+ * # Safety
+ * `h` live handle; `name` valid for `len` bytes; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_create_custom_polity(struct KodScenario *h,
+                                                 const uint8_t *name,
+                                                 size_t len,
+                                                 uint32_t *out_code);
+
+/**
+ * Bookmarks the current selection.
+ *
+ * # Safety
+ * `h` live handle; `name` valid for `len` bytes; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_add_bookmark(struct KodScenario *h,
+                                         const uint8_t *name,
+                                         size_t len,
+                                         uint32_t *out_code);
+
+/**
+ * Restores a bookmark.
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_apply_bookmark(struct KodScenario *h,
+                                           uint32_t bookmark,
+                                           uint32_t *out_code);
+
+/**
+ * Removes a bookmark.
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_remove_bookmark(struct KodScenario *h,
+                                            uint32_t bookmark,
+                                            uint32_t *out_code);
+
+/**
+ * Locks the setup (requires a selected, available polity).
+ *
+ * # Safety
+ * `h` live handle; `out_code` null or valid.
+ */
+enum KodStatus kod_scenario_confirm(struct KodScenario *h, uint32_t *out_code);
+
+/**
+ * Copies the JSON view (two-call pattern).
+ *
+ * # Safety
+ * `h` live handle; `buf` null or valid for `cap`; `out_len` valid.
+ */
+enum KodStatus kod_scenario_view_json(struct KodScenario *h,
+                                      uint8_t *buf,
+                                      size_t cap,
+                                      size_t *out_len);
+
+/**
+ * Serialises the setup (save container v1, schema `kod.scenario.setup`).
+ *
+ * # Safety
+ * `h` live handle; `buf` null or valid for `cap`; `out_len` valid.
+ */
+enum KodStatus kod_scenario_save(struct KodScenario *h, uint8_t *buf, size_t cap, size_t *out_len);
+
+/**
+ * Restores a setup. The save keeps its own dataset; if the runtime fixture
+ * differs, loading fails with `INVALID_SAVE` instead of switching sources.
+ *
+ * # Safety
+ * `data` valid for `len`; `out` valid for writes.
+ */
+enum KodStatus kod_scenario_load(uint32_t abi_version,
+                                 const uint8_t *data,
+                                 size_t len,
+                                 struct KodScenario **out);
 
 #ifdef __cplusplus
 }  // extern "C"

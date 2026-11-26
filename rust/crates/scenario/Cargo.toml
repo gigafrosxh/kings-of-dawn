@@ -1,0 +1,10 @@
+[package]
+name = "kod-scenario"
+version = "0.1.0"
+description = "F-01 start year and scenarios: year picker, atlas contract, scenario resolver and setup domain."
+edition = "2024"
+rust-version = "1.100"
+publish = false
+
+[dependencies]
+kod-core = { path = "../core" }
