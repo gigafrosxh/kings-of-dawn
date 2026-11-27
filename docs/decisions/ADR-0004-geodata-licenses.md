@@ -1,12 +1,12 @@
 # ADR-0004 – Lizenzentscheidung für Kartendaten
 
-- Status: vorgeschlagen (Issue #57, Teil von #9) – **Annahme kommerzieller Vertrieb vom Projektinhaber zu bestätigen**
+- Status: angenommen (Issue #57, Teil von #9). Vorgabe des Projektinhabers vom 2026-11-27: Das Vertriebsmodell ist **noch offen**. Bis zu einer Entscheidung werden ausschließlich Kartendaten verwendet, deren Lizenz kommerzielle Nutzung erlaubt, damit ein späterer Verkauf möglich bleibt.
 - Maschinenlesbar: [`data/sources/manifest.json`](../../data/sources/manifest.json), geprüft durch `scripts/validate-sources.py` (CI-Workflow `data`)
 - Prüfstand: 2026-11-26 (Lizenzseiten der Quellen A–F abgerufen; G/H nicht erneut geprüft)
 
 ## Annahme
 
-Kings of Dawn wird als kommerzielles Spiel vertrieben und liefert Geodaten im Build aus. Damit scheiden NonCommercial-Lizenzen aus, und Copyleft-Daten dürfen nicht mit den ausgelieferten Daten verschmelzen.
+Kings of Dawn muss kommerziell vertreibbar bleiben (Vertriebsmodell noch offen, siehe Status) und liefert Geodaten im Build aus. Damit scheiden NonCommercial-Lizenzen aus, und Copyleft-Daten dürfen nicht mit den ausgelieferten Daten verschmelzen.
 
 ## Entscheidung je Quelle
 
@@ -26,5 +26,5 @@ Kings of Dawn wird als kommerzielles Spiel vertrieben und liefert Geodaten im Bu
 - Der Atlas-Import (F-02, #12) muss je Objekt die Quell-ID und Lizenz mitführen und Objekte mit Entscheidung `tooling-only`/`exclude` aus Build-Daten fernhalten.
 - Credits-/Datenhinweis-Screen muss die Attributionspflichten aus dem Manifest anzeigen (A, F; empfohlen C, E).
 - Prüfsummen (`sha256`) werden beim ersten Download eingetragen; bis dahin `null`. Downloads erfolgen erst im Import-Schritt.
-- Bei nicht-kommerziellem Vertrieb wäre D als zusätzliche Validierungsquelle neu zu bewerten.
+- Erst wenn der Projektinhaber ausdrücklich einen nicht-kommerziellen Vertrieb festlegt, wäre D als zusätzliche Validierungsquelle neu zu bewerten. Bis dahin bleibt D ausgeschlossen.
 - Dies ist eine technische Lizenzeinordnung, keine Rechtsberatung; vor Veröffentlichung juristisch prüfen lassen.

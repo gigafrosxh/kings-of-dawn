@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "reviewed": "2026-11-26",
-  "distribution_assumption": "commercial game; geodata bundled in shipped builds",
+  "distribution_assumption": "distribution model undecided (owner, 2026-11-27); must stay commercially distributable: only commercial-use licenses, geodata bundled in shipped builds",
   "decision_values": {
     "bundle": "may ship in game builds with the listed obligations",
     "bundle-filtered": "may ship only the subset passing the listed filter",
