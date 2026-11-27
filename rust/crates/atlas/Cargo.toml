@@ -1,0 +1,11 @@
+[package]
+name = "kod-atlas"
+version = "0.2.0"
+description = "F-02 historical atlas: time-bounded polity assertions and border versions with provenance, validation and year queries."
+edition = "2024"
+rust-version = "1.100"
+publish = false
+
+[dependencies]
+kod-core = { path = "../core" }
+kod-scenario = { path = "../scenario" }
