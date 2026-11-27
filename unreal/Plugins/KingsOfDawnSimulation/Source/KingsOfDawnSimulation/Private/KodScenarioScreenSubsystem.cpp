@@ -12,6 +12,8 @@
 #include "Misc/Paths.h"
 #include "TimerManager.h"
 #include "UnrealClient.h"
+#include "ImageUtils.h"
+#include "Widgets/SWindow.h"
 #include "Engine/World.h"
 #include "SKodScenarioPanel.h"
 #include "Widgets/Layout/SBox.h"
@@ -54,7 +56,14 @@ void UKodScenarioScreenSubsystem::Show(APlayerController* PC)
 	if (FParse::Value(FCommandLine::Get(), TEXT("KodScenarioScreenshot="), ShotPath) && PC->GetWorld())
 	{
 		FTimerHandle Shot, Quit;
-		PC->GetWorld()->GetTimerManager().SetTimer(Shot, [ShotPath]() { FScreenshotRequest::RequestScreenshot(ShotPath, true, false); }, 3.f, false);
+		TWeakObjectPtr<UKodScenarioScreenSubsystem> WeakThis(this);
+		PC->GetWorld()->GetTimerManager().SetTimer(Shot, [WeakThis, ShotPath]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->CaptureWindow(ShotPath);
+			}
+		}, 3.f, false);
 		PC->GetWorld()->GetTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 6.f, false);
 	}
 }
@@ -78,6 +87,29 @@ void UKodScenarioScreenSubsystem::HandleStarted()
 	UE_LOG(LogKodSimulation, Log, TEXT("Scenario confirmed: %s, polity %u, dataset %s %s"),
 		*ViewModel->GetView().YearLabel, ViewModel->GetView().SelectedPolity, *ViewModel->GetView().DatasetId, *ViewModel->GetView().DatasetVersion);
 	Hide();
+}
+
+bool UKodScenarioScreenSubsystem::CaptureWindow(const FString& Path) const
+{
+	// Slate capture of the whole game window (viewport + UI); works in editor -game
+	// and packaged builds alike (#63), unlike FScreenshotRequest.
+	UGameViewportClient* Viewport = GetLocalPlayer() ? GetLocalPlayer()->ViewportClient : nullptr;
+	const TSharedPtr<SWindow> Window = Viewport ? Viewport->GetWindow() : nullptr;
+	TArray<FColor> Pixels;
+	FIntVector Size;
+	if (!Window.IsValid() || !FSlateApplication::Get().TakeScreenshot(Window.ToSharedRef(), Pixels, Size) || Pixels.Num() == 0)
+	{
+		UE_LOG(LogKodSimulation, Error, TEXT("Scenario screenshot failed: no window capture"));
+		return false;
+	}
+	for (FColor& Pixel : Pixels)
+	{
+		Pixel.A = 255;
+	}
+	const FImageView Image(Pixels.GetData(), Size.X, Size.Y);
+	const bool bSaved = FImageUtils::SaveImageByExtension(*Path, Image);
+	UE_LOG(LogKodSimulation, Display, TEXT("Scenario screenshot %s: %s (%dx%d)"), bSaved ? TEXT("written") : TEXT("FAILED"), *Path, Size.X, Size.Y);
+	return bSaved;
 }
 
 bool UKodScenarioScreenSubsystem::SaveSetup() const
