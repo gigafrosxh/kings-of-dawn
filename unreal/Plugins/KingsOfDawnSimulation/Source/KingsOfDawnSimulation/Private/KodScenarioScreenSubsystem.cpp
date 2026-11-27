@@ -107,8 +107,23 @@ bool UKodScenarioScreenSubsystem::CaptureWindow(const FString& Path) const
 		Pixel.A = 255;
 	}
 	const FImageView Image(Pixels.GetData(), Size.X, Size.Y);
-	const bool bSaved = FImageUtils::SaveImageByExtension(*Path, Image);
-	UE_LOG(LogKodSimulation, Display, TEXT("Scenario screenshot %s: %s (%dx%d)"), bSaved ? TEXT("written") : TEXT("FAILED"), *Path, Size.X, Size.Y);
+	TArray64<uint8> Png;
+	if (!FImageUtils::CompressImage(Png, TEXT("png"), Image))
+	{
+		UE_LOG(LogKodSimulation, Error, TEXT("Scenario screenshot failed: PNG encoding"));
+		return false;
+	}
+	// Packaged macOS builds run in the App Sandbox and may not write outside their
+	// container; fall back to the game's screenshot directory and log the real path.
+	FString Target = FPaths::IsRelative(Path) ? FPaths::Combine(FPaths::ScreenShotDir(), Path) : Path;
+	bool bSaved = FFileHelper::SaveArrayToFile(Png, *Target);
+	if (!bSaved)
+	{
+		Target = FPaths::Combine(FPaths::ScreenShotDir(), FPaths::GetCleanFilename(Path));
+		bSaved = FFileHelper::SaveArrayToFile(Png, *Target);
+	}
+	Target = FPaths::ConvertRelativePathToFull(Target);
+	UE_LOG(LogKodSimulation, Display, TEXT("Scenario screenshot %s: %s (%dx%d)"), bSaved ? TEXT("written") : TEXT("FAILED"), *Target, Size.X, Size.Y);
 	return bSaved;
 }
 
