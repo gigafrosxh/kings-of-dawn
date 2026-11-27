@@ -6,6 +6,6 @@ public class KingsOfDawnSimulation : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine" });
-		PrivateDependencyModuleNames.AddRange(new[] { "KodFfi", "Slate", "SlateCore", "InputCore", "Json" });
+		PrivateDependencyModuleNames.AddRange(new[] { "KodFfi", "Slate", "SlateCore", "InputCore", "Json", "ImageCore" });
 	}
 }

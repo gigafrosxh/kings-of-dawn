@@ -37,6 +37,8 @@ public:
 	FReply OnStart();
 
 	ETab GetActiveTab() const { return ActiveTab; }
+	/** The panel accepts keyboard focus so UI-only input mode can focus it (#62). */
+	virtual bool SupportsKeyboardFocus() const override { return true; }
 	/** Visible texts of the details section, for tests: Startjahr, Spielmodus, Land, Quellengüte, Datenstatus. */
 	TArray<FText> GetDetailTexts() const;
 

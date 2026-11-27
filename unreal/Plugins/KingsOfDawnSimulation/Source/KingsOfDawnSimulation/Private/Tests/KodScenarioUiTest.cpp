@@ -19,6 +19,7 @@ bool FKodScenarioUiSmokeTest::RunTest(const FString& Parameters)
 		.ViewModel(VM)
 		.OnStarted(FOnKodScenarioStarted::CreateLambda([&bStarted]() { bStarted = true; }));
 
+	TestTrue(TEXT("panel is keyboard focusable (#62)"), Panel->SupportsKeyboardFocus());
 	TestEqual(TEXT("presets"), VM->GetView().Presets.Num(), 9);
 	TestEqual(TEXT("starts at 100 BC"), VM->GetView().YearLabel, FString(TEXT("100 v. Chr.")));
 

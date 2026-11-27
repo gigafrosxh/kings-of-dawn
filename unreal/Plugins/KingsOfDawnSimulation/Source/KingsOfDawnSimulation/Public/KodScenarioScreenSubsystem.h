@@ -20,6 +20,9 @@ public:
 	/** Saves the confirmed (or current) setup to `Saved/KodScenario.kodsave`. */
 	bool SaveSetup() const;
 
+	/** Writes a PNG of the game window including UI (development/test aid). */
+	bool CaptureWindow(const FString& Path) const;
+
 private:
 	void Show(APlayerController* PC);
 	void Hide();
